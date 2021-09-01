@@ -1,0 +1,41 @@
+{
+    "onem2m" : {
+        "csebase" : {
+            "host" : "210.97.42.250",
+            "port" : "11710",
+            "id" : "/iotCore",
+            "name" : "iotCore"
+        },
+        "ae" : {
+            "name" : "SON_DEMO",
+            "appid" : "measure_co2"
+        },
+        "protocol" : "http",
+        "bodytype" : "json",
+        "host" : "10.10.0.198",
+        "port" : "3000"
+    },
+
+    "ocf" : {
+        "host" : "10.10.0.198",
+        "port" : "64931",
+        "observe" : true,
+        "upload":
+        [
+            {
+                "ctname":"co2",
+                "id":"31313131-3131-3131-3131-313131313131/a/light"
+            }
+        ],
+        "download":
+        [
+            {
+                "ctname":"temp",
+                "id":"31313131-3131-3131-3131-313131313131/a/light"
+            }
+        ]
+    }
+
+}
+
+

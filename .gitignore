@@ -1,0 +1,6 @@
+# node modules setting
+node_modules
+# intellij settings
+.idea
+# compile directory
+dist
