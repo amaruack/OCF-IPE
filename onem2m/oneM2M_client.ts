@@ -89,10 +89,12 @@ class OneM2MClient {
                     if (mapp.ctname) {
                         // const _that = this;
                         const temp = mapp.id.split('/');
-                        const deviceId = temp[0];
                         const ocfResourceName = temp.slice(1).join('/');
+                        let uri = 'coap' +'://'+ globalData.conf.ocf.host + ':' + globalData.conf.ocf.port +'/'+ocfResourceName;
+                        if (mapp.ep) {
+                            uri = mapp.ep + '/' + ocfResourceName;
+                        }
 
-                        const uri = 'coap' +'://'+ globalData.conf.ocf.host + ':' + globalData.conf.ocf.port +'/'+ocfResourceName;
                         let sendData = undefined;
                         try{
                             sendData = JSON.parse(content);

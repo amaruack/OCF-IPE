@@ -134,6 +134,7 @@ interface OCFOption {
 interface OCF_OneM2M_Mapp {
     ctname : string;
     id : string;
+    ep : string; // coap만 셋팅하는 걸로
 }
 
 interface OneM2MOption {

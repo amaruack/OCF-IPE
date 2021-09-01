@@ -18,7 +18,7 @@
 
     "ocf" : {
         "host" : "10.10.0.198",
-        "port" : "49171",
+        "port" : "5683",
         "observe" : true,
         "upload":
         [

@@ -72,7 +72,12 @@ class OcfClient {
                     const tmp = item.anchor+item.href;
                     if (tmp.lastIndexOf(stream.id) > 0) {
                         bl = true;
-                        break;
+                        for (let ep of item.eps) {
+                            // 프로토콜이 coap 인 경우에만 처 리
+                            if (ep.ep.startsWith('coap://')) {
+                                stream.ep = ep.ep;
+                            }
+                        }
                     }
                 }
                 if (!bl) {
@@ -202,7 +207,10 @@ class OcfClient {
             if (globalData.conf.ocf.observe) {
                 const temp = globalData.conf.ocf.upload[i].id.split('/');
                 const ocfResourceName = temp.slice(1).join('/');
-                const uri = 'coap' +'://'+ globalData.conf.ocf.host + ':' + globalData.conf.ocf.port +'/'+ocfResourceName;
+                let uri = 'coap' +'://'+ globalData.conf.ocf.host + ':' + globalData.conf.ocf.port +'/'+ocfResourceName;
+                if (globalData.conf.ocf.upload[i].ep) {
+                    uri = globalData.conf.ocf.upload[i].ep + '/' + ocfResourceName;
+                }
 
                 this.ocf_request_observe(uri, function(data) {
                     // 데이터를 onem2m에 전달 해야됨 // eventemitter로 전달
@@ -228,7 +236,10 @@ class OcfClient {
         const deviceId = temp[0];
         const ocfResourceName = temp.slice(1).join('/');
 
-        const uri = 'coap' +'://'+ globalData.conf.ocf.host + ':' + globalData.conf.ocf.port +'/'+ocfResourceName;
+        let uri = 'coap' +'://'+ globalData.conf.ocf.host + ':' + globalData.conf.ocf.port +'/'+ocfResourceName;
+        if (mapp.ep) {
+            uri = mapp.ep + '/' + ocfResourceName;
+        }
 
         _this.ocf_request(uri, function(data){
             // 데이터를 onem2m에 전달 해야됨 // eventemitter로 전달
