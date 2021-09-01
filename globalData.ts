@@ -1,5 +1,6 @@
 import fs from 'fs';
 import EventEmitter from "events";
+import path from "path";
 
 enum ONEM2M_STATE {
     CREATE_AE,
@@ -30,16 +31,15 @@ enum BODY_TYPE {
 
 class GlobalData {
 
-    resp_mqtt_ri_arr = [];
-    resp_mqtt_path_arr = {};
-    socket_q = {};
     conf:Option = {} as Option ;
     sh_state ;
-    mqtt_client = null;
-
-    callback_q ;
-
     eventEmitter ;
+
+    // resp_mqtt_ri_arr = [];
+    // resp_mqtt_path_arr = {};
+    // socket_q = {};
+    // mqtt_client = null;
+    // callback_q ;
 
     constructor() {
         this.init();
@@ -48,11 +48,15 @@ class GlobalData {
     public async init() : Promise<any> {
         let _that = this;
         return new Promise(function(resolve, reject) {
-
             _that.eventEmitter = new EventEmitter();
-
             _that.sh_state = ONEM2M_STATE.RETRIVE_AE;
-            _that.conf = JSON.parse(fs.readFileSync('setting.json', 'utf8'));
+            const home: string = <string>process.env.OCF_IPE_HOME;
+            if (!home) {
+                console.log(`system env OCF_IPE_HOME is not setting`);
+                process.exit(0);
+            }
+            const filePath = path.join(home, 'setting.json');
+            _that.conf = JSON.parse(fs.readFileSync(filePath, 'utf8'));
             _that.conf.onem2m.ae = _that.createAe(_that.conf);
             _that.conf.onem2m.ae.ctn = _that.createCnt(_that.conf);
             resolve();
