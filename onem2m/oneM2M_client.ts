@@ -4,12 +4,10 @@ import http from 'http';
 import mqtt from 'mqtt';
 import coap from 'coap';
 import WebSocketClient from 'websocket';
-// var WebSocketClient = require('websocket').client;
 import bodyParser from 'body-parser';
 import js2xmlparser from 'js2xmlparser';
 import xml2js from 'xml2js';
 import shortid from 'shortid';
-import EventEmitter from 'events';
 import cbor from 'cbor';
 
 import {globalData, Option, OneM2MOption, HTTP_METHOD, PROTOCOL_TYPE, BODY_TYPE, Container} from '../globalData';
@@ -143,11 +141,11 @@ class OneM2MClient {
             options.headers['Content-Length'] = bodyString.length;
         }
 
-        if(method === 'post') {
+        if(method === HTTP_METHOD.POST) {
             let a = (ty==='') ? '': ('; ty='+ty);
             options.headers['Content-Type'] = 'application/vnd.onem2m-res+' + this.onem2m_option.bodytype + a;
         }
-        else if(method === 'put') {
+        else if(method === HTTP_METHOD.PUT) {
             options.headers['Content-Type'] = 'application/vnd.onem2m-res+' + this.onem2m_option.bodytype;
         }
 
@@ -207,8 +205,7 @@ class OneM2MClient {
         });
 
         //console.log(bodyString);
-
-        console.log(path);
+        // console.log(path);
 
         req.write(bodyString);
         req.end();

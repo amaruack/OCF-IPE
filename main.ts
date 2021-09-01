@@ -1,24 +1,31 @@
 import {globalData, ONEM2M_STATE} from './globalData';
 import {oneM2MClient} from './onem2m/oneM2M_client';
-import {ocfClient, OCF_Response, OCP_EndPoint} from './ocf/ocf_client';
+import {ocfClient, OCF_Resource_Response, OCP_EndPoint} from './ocf/ocf_client';
 
-let ocf_oic_d_receive = function(data){
+const ocf_oic_d_receive = function(data){
     console.log(data);
 }
 
-let ocf_oic_res_receive = function(datas){
-    console.log(datas);
-    datas.forEach(function(data:OCF_Response) {
-        let eps = data.eps;
-        eps.forEach(function(ep : OCP_EndPoint) {
-            console.log(ep.ep);
-        })
-    })
+// const ocf_oic_res_receive = function(datas){
+//     console.log(datas);
+//     datas.forEach(function(data:OCF_Resource_Response) {
+//         let eps = data.eps;
+//         eps.forEach(function(ep : OCP_EndPoint) {
+//             console.log(ep.ep);
+//         })
+//     })
+// }
+
+
+const request_ocf_setting= function(){
+    ocfClient.init();
 }
+
+setTimeout(request_ocf_setting, 100);
 
 let request_count = 0;
 
-let request_oneM2M_setting = function() {
+const request_oneM2M_setting = function() {
     if (globalData.sh_state == ONEM2M_STATE.CREATE_AE) {
         oneM2MClient.create_ae(globalData.conf.onem2m.ae.parent, globalData.conf.onem2m.ae.name, globalData.conf.onem2m.ae.appid, create_ae_callback);
     } else if (globalData.sh_state == ONEM2M_STATE.RETRIVE_AE) {
@@ -37,14 +44,14 @@ let request_oneM2M_setting = function() {
     }
 }
 
-setTimeout(request_oneM2M_setting, 100);
+// setTimeout(request_oneM2M_setting, 100);
 
 /**
  * onem2m ae resource create call back
  * @param status
  * @param res_body
  */
-let create_ae_callback = function (status, res_body) {
+const create_ae_callback = function (status, res_body) {
     console.log(res_body);
     if (status == 2001) {
         globalData.sh_state = ONEM2M_STATE.RETRIVE_AE;
@@ -64,7 +71,7 @@ let create_ae_callback = function (status, res_body) {
  * @param status
  * @param res_body
  */
-let retrieve_ae_callback = function (status, res_body){
+const retrieve_ae_callback = function (status, res_body){
     if (status == 2000) {
         let aeid = res_body['m2m:ae']['aei'];
         console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
@@ -83,7 +90,7 @@ let retrieve_ae_callback = function (status, res_body){
     }
 }
 
-let retrieve_container_callback = function (status, res_body, count){
+const retrieve_container_callback = function (status, res_body, count){
     console.log(res_body);
     if (status == 2000) {
         request_count ++;
@@ -107,7 +114,7 @@ let retrieve_container_callback = function (status, res_body, count){
     }
 }
 
-let create_container_callback = function(status, res_body, count) {
+const create_container_callback = function(status, res_body, count) {
     if (status == 5106 || status == 2001 || status == 4105) {
         // request_count ++;
         globalData.sh_state =  ONEM2M_STATE.RETRIVE_CONTAINER;
