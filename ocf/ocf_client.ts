@@ -1,8 +1,8 @@
 import coap from 'coap';
 import cbor from 'cbor';
 import urlObject from 'url';
-import {globalData, OCF_OneM2M_Mapp, Container} from "./globalData";
-import {oneM2MClient} from "./oneM2M_client";
+import {globalData, OCF_OneM2M_Mapp, Container} from "../globalData";
+import {oneM2MClient} from "../onem2m/oneM2M_client";
 
 
 const OCF_MEDIA_TYPE = {
