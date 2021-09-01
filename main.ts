@@ -1,6 +1,6 @@
 import {globalData, ONEM2M_STATE} from './globalData';
-import {oneM2MClient} from './oneM2M_client';
-import {ocfClient, OCF_Response, OCP_EndPoint} from './ocf_client';
+import {oneM2MClient} from './onem2m/oneM2M_client';
+import {ocfClient, OCF_Response, OCP_EndPoint} from './ocf/ocf_client';
 
 let ocf_oic_d_receive = function(data){
     console.log(data);

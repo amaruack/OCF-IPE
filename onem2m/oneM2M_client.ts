@@ -12,8 +12,8 @@ import shortid from 'shortid';
 import EventEmitter from 'events';
 import cbor from 'cbor';
 
-import {globalData, Option, OneM2MOption, HTTP_METHOD, PROTOCOL_TYPE, BODY_TYPE, Container} from './globalData';
-import {ocfClient, OCF_OneM2M_Mapp} from "./ocf_client";
+import {globalData, Option, OneM2MOption, HTTP_METHOD, PROTOCOL_TYPE, BODY_TYPE, Container} from '../globalData';
+import {ocfClient, OCF_OneM2M_Mapp} from "../ocf/ocf_client";
 
 enum ONEM2M_RESOURCE_TYPE {
     AE = '2',
