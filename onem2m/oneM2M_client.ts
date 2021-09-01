@@ -10,7 +10,16 @@ import xml2js from 'xml2js';
 import shortid from 'shortid';
 import cbor from 'cbor';
 
-import {globalData, Option, OneM2MOption, HTTP_METHOD, PROTOCOL_TYPE, BODY_TYPE, Container} from '../globalData';
+import {
+    globalData,
+    Option,
+    OneM2MOption,
+    HTTP_METHOD,
+    PROTOCOL_TYPE,
+    BODY_TYPE,
+    Container,
+    ONEM2M_STATE
+} from '../globalData';
 import {ocfClient, OCF_OneM2M_Mapp} from "../ocf/ocf_client";
 
 enum ONEM2M_RESOURCE_TYPE {
@@ -111,7 +120,126 @@ class OneM2MClient {
         this.app.listen(this.onem2m_option.port, this.onem2m_option.host, () => {
             console.log(`app listening at http://${this.onem2m_option.host}:${this.onem2m_option.port}`)
         });
+    }
 
+    public init(){
+
+        let request_count = 0;
+
+        const request_oneM2M_setting = function() {
+            if (globalData.sh_state == ONEM2M_STATE.CREATE_AE) {
+                oneM2MClient.create_ae(globalData.conf.onem2m.ae.parent, globalData.conf.onem2m.ae.name, globalData.conf.onem2m.ae.appid, create_ae_callback);
+            } else if (globalData.sh_state == ONEM2M_STATE.RETRIVE_AE) {
+                request_count = 0;
+                oneM2MClient.retrieve_ae(globalData.conf.onem2m.ae.parent + '/' + globalData.conf.onem2m.ae.name, retrieve_ae_callback);
+            } else if (globalData.sh_state == ONEM2M_STATE.RETRIVE_CONTAINER) {
+                let data = globalData.conf.onem2m.ae.ctn[request_count];
+                oneM2MClient.retrieve_container(globalData.conf.onem2m.ae.parent + '/' + globalData.conf.onem2m.ae.name + '/' + data.name, request_count , retrieve_container_callback);
+            } else if (globalData.sh_state == ONEM2M_STATE.CREATE_CONTAINER) {
+                let data = globalData.conf.onem2m.ae.ctn[request_count];
+                oneM2MClient.create_container(globalData.conf.onem2m.ae.parent + '/' + globalData.conf.onem2m.ae.name, data.name, request_count , create_container_callback);
+            }
+        }
+        setTimeout(request_oneM2M_setting, 100);
+        /**
+         * onem2m ae resource create call back
+         * @param status
+         * @param res_body
+         */
+        const create_ae_callback = function (status, res_body) {
+            console.log(res_body);
+            if (status == 2001) {
+                globalData.sh_state = ONEM2M_STATE.RETRIVE_AE;
+                setTimeout(request_oneM2M_setting, 100);
+            } else if (status == 5106 || status == 4105) {
+                console.log('x-m2m-rsc : ' + status + ' <----');
+                globalData.sh_state = ONEM2M_STATE.RETRIVE_AE;
+                setTimeout(request_oneM2M_setting, 100);
+            } else {
+                console.log('[???} create container error!  ', status + ' <----');
+                // setTimeout(setup_resources, 3000, 'crtae');
+            }
+        }
+
+        /**
+         * onem2m ae resource retrieve call back
+         * @param status
+         * @param res_body
+         */
+        const retrieve_ae_callback = function (status, res_body){
+            if (status == 2000) {
+                let aeid = res_body['m2m:ae']['aei'];
+                console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
+
+                if(globalData.conf.onem2m.ae.id != aeid && globalData.conf.onem2m.ae.id != ('/'+aeid)) {
+                    console.log('AE-ID created is ' + aeid + ' not equal to device AE-ID is ' + globalData.conf.onem2m.ae.id);
+                } else {
+                    request_count = 0;
+                    globalData.sh_state = ONEM2M_STATE.RETRIVE_CONTAINER;
+                    setTimeout(request_oneM2M_setting, 100);
+                }
+            } else {
+                console.log('x-m2m-rsc : ' + status + ' <----');
+                globalData.sh_state =  ONEM2M_STATE.CREATE_AE;
+                setTimeout(request_oneM2M_setting, 1000);
+            }
+        }
+
+        const retrieve_container_callback = function (status, res_body, count){
+            console.log(res_body);
+            if (status == 2000) {
+                request_count ++;
+                // 아직 container 가 남아 있다면
+                if (request_count <= globalData.conf.onem2m.ae.ctn.length - 1) {
+                    globalData.sh_state =  ONEM2M_STATE.RETRIVE_CONTAINER;
+                    setTimeout(request_oneM2M_setting, 100);
+                    // 마지막 container 까지 다 돌 경우
+                } else {
+                    console.log('all container created ');
+                    // 여기서 이제 다음 처리해야됨 .. 주기적으로 ocf 데이터 조회해서 데이터 전달 하는 로직
+                    // 아니면 observe 설정해서 데이터 수신 받을 때마다 oneM2M으로 데이터 전달
+                    ocfClient.observeSetting();
+                }
+            } else {
+                console.log('x-m2m-rsc : ' + status + ' <----');
+                globalData.sh_state =  ONEM2M_STATE.CREATE_CONTAINER;
+                setTimeout(request_oneM2M_setting, 100);
+            }
+        }
+
+        const create_container_callback = function(status, res_body, count) {
+            if (status == 5106 || status == 2001 || status == 4105) {
+                // request_count ++;
+                globalData.sh_state =  ONEM2M_STATE.RETRIVE_CONTAINER;
+                setTimeout(request_oneM2M_setting, 100);
+            } else {
+                console.log('[???} create container error!');
+            }
+
+            // if(conf.cnt.length == 0) {
+            //     callback(2001, count);
+            // }
+            // else {
+            //     if(conf.cnt.hasOwnProperty(count)) {
+            //         let parent = conf.cnt[count].parent;
+            //         let rn = conf.cnt[count].name;
+            //         onem2m_client.create_cnt(parent, rn, count, function (rsc, res_body, count) {
+            //             if (rsc == 5106 || rsc == 2001 || rsc == 4105) {
+            //                 create_cnt_all(++count, function (status, count) {
+            //                     callback(status, count);
+            //                 });
+            //             }
+            //             else {
+            //                 callback(9999, count);
+            //             }
+            //         });
+            //     }
+            //     else {
+            //         callback(2001, count);
+            //     }
+            // }
+
+        }
     }
 
     private mqtt_init = function(){

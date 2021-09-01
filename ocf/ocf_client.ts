@@ -32,7 +32,7 @@ class OcfClient {
     }
 
     public init(){
-
+        const that = this;
         // oic platform
         const oic_p_uri = 'coap' +'://'+ globalData.conf.ocf.host + ':' + globalData.conf.ocf.port +'/oic/p';
         this.ocf_request(oic_p_uri, function(_data:OCF_Platform_Response){
@@ -80,8 +80,15 @@ class OcfClient {
                 }
             }
 
+            // 여기서 onem2m 프로세스를 진행해야 할 거 같은데
+            setTimeout(that.onem2m_client_init, 100);
         })
     }
+
+    public onem2m_client_init(){
+        oneM2MClient.init();
+    }
+
     public ocf_request(target : string, _callback){
         const url = urlObject.parse(target);
         const coapConnection = {
@@ -187,7 +194,7 @@ class OcfClient {
         req.end()
     }
 
-    private observeSetting(){
+    public observeSetting(){
         // TODO 여기에서 OCF에 observe 요청 날리거나 주기적으로 데이터 요청 하는거 날려야됨 setTimeout
         // 추가적으로 response 받은 oic/res 에서 observe 가 가능한 데이터인지를 확인해야한다.
         for (let i = 0; i < globalData.conf.ocf.upload.length; i++) {
