@@ -1,10 +1,11 @@
 import fs from 'fs';
+import WebSocketClient from 'websocket';
+import bodyParser from 'body-parser';
+
 import express from 'express';
 import http from 'http';
 import mqtt from 'mqtt';
 import coap from 'coap';
-import WebSocketClient from 'websocket';
-import bodyParser from 'body-parser';
 import js2xmlparser from 'js2xmlparser';
 import xml2js from 'xml2js';
 import shortid from 'shortid';
